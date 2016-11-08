@@ -1,6 +1,9 @@
 #include <iostream>
 #include "tools.h"
+
+#ifdef RUN_GTEST
 #include <gtest/gtest.h>
+#endif
 
 using namespace std;
 

@@ -1,3 +1,4 @@
 *.swp
 /obj/*
 comp4133
+*.exe
