@@ -1,4 +1,5 @@
 #include "tools.h"
+#include <algorithm>
 
 // Delete the trailing newline and carriage return of a line
 void FilterTrailNewline(char * line) {
@@ -46,7 +47,16 @@ tools::tools(string stop_file) {
     load_stop(stop_file.c_str());
 }
 
-int tools::is_stop(string word) {
+char easytolower(char in){
+    if(in<='Z' && in>='A')
+        return in-('Z'-'z');
+    return in;
+} 
+
+int tools::is_stop(string word, int to_lower) {
+    if (to_lower) {
+        transform(word.begin(), word.end(), word.begin(), easytolower);
+    }
     return stop_list.find(word) != stop_list.end();
 }
 
