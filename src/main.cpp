@@ -1,5 +1,6 @@
 #include <iostream>
 #include "tools.h"
+#include "InvFile.h"
 
 #ifdef RUN_GTEST
 #include <gtest/gtest.h>
@@ -9,14 +10,10 @@ using namespace std;
 
 int main(int argc, char** argv) {
 #ifdef RUN_GTEST
-    ::testing::InitGoogleTest(&argc, argv);
-    RUN_ALL_TESTS();
+	::testing::InitGoogleTest(&argc, argv);
+	cout << "RUN_ALL_TESTS(): " << RUN_ALL_TESTS() << endl;
+    //InvFile inv;
+    //inv.Build("data/post1.txt");
 #endif
-    tools mytools("data/estop.lst");
-    cout << mytools.is_stop("ABC") << endl;
-    cout << mytools.is_stop("Is") << endl;
-    cout << mytools.is_stop("Is", 0) << endl;
-    cout << mytools.is_stop("is", 0) << endl;
-    cout << mytools.is_stop("is", -1) << endl;
-    return 0;
+	return 0;
 }

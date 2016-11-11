@@ -1,6 +1,6 @@
 # Compiler options
 CC := g++
-CFLAGS :=
+CFLAGS := -std=c++11
 #CFLAGS := -Wall -Wextra -pedantic
 
 # Directories structure
@@ -13,7 +13,7 @@ LIBDIR := lib/include
 LIB_SRC_DIR := lib
 
 # Files to be compiled
-OBJS := $(addprefix $(OBJDIR)/,tools.o)
+OBJS := $(addprefix $(OBJDIR)/,tools.o InvFile.o)
 
 .DEFAULT_GOAL := default
 
@@ -42,7 +42,7 @@ test: $(OBJS) $(OBJDIR)/stem.o main_test $(OBJDIR)/test_case.o
 	@echo Building comp4133 and test cases, this creates a dependency on Google Test library.
 	@$(CC) -o comp4133 $(OBJS) $(OBJDIR)/stem.o $(OBJDIR)/test_case.o $(OBJDIR)/main.o -lgtest -lpthread
 
-$(OBJDIR)/test_case.o: $(OBJDIR)
+$(OBJDIR)/test_case.o: $(OBJDIR) $(SRCDIR)/test_case.cpp
 	@echo Building test_case.o
 	@$(CC) -isystem $(LIBDIR) -I $(INCDIR) -c $(CFLAGS) $(SRCDIR)/test_case.cpp -o $(OBJDIR)/test_case.o
 

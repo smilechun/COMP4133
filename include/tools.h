@@ -10,7 +10,7 @@ using namespace std;
 class tools {
 public:
     tools(string stop_file);
-    int is_stop(string word, int to_ower = 1);
+    int is_stop(string word, int ignore_case = 1);
     void stem(string &word);
 private:
     map<string, int> stop_list;

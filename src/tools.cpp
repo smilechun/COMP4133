@@ -27,39 +27,38 @@ void LowerStr(char * s) {
 
 // Stopword list from the given file
 void tools::load_stop(const char *f) {
-
 	FILE * fp = fopen(f, "rb");
 	std::string x;
 	this->stop_list.clear();
 	char line[1000];
 
-		while (fgets(line, 1000, fp) != NULL) {
-			FilterTrailNewline(line);
-			LowerStr(line);
-			x = line;
-			stop_list.insert(dic::value_type(x,1));
-		}
+	while (fgets(line, 1000, fp) != NULL) {
+		FilterTrailNewline(line);
+		LowerStr(line);
+		x = line;
+		stop_list.insert(dic::value_type(x,1));
+	}
 
 	fclose(fp);
 }
 
 tools::tools(string stop_file) {
-    load_stop(stop_file.c_str());
+	load_stop(stop_file.c_str());
 }
 
-char easytolower(char in){
-    if(in<='Z' && in>='A')
-        return in-('Z'-'z');
-    return in;
-} 
+char easytolower(char in) {
+	if(in<='Z' && in>='A')
+		return in-('Z'-'z');
+	return in;
+}
 
-int tools::is_stop(string word, int to_lower) {
-    if (to_lower) {
-        transform(word.begin(), word.end(), word.begin(), easytolower);
-    }
-    return stop_list.find(word) != stop_list.end();
+int tools::is_stop(string word, int ignore_case) {
+	if (ignore_case) {
+		transform(word.begin(), word.end(), word.begin(), easytolower);
+	}
+	return stop_list.find(word) != stop_list.end();
 }
 
 void tools::stem(string &word) {
-    stem_proc.Stem(word);
+	stem_proc.Stem(word);
 }
