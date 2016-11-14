@@ -40,7 +40,7 @@ public:
 
     // Retrieval functions
     size_t GetDF(string stem_word);
-    RetrievalResult RetrievalBoolean(vector<string> query);
+    RetrievalResult RetrievalBoolean(string query);
     
     // Debug
     void DebugPrint();

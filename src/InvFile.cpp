@@ -71,14 +71,16 @@ size_t InvFile::GetDF(string stem_word) {
 }
 
 // a AND ( b OR c)
-RetrievalResult InvFile::RetrievalBoolean(vector<string> query) {
+RetrievalResult InvFile::RetrievalBoolean(string query) {
     RetrievalResult result;
+    /*
     for(const string &word : query) {
         cout << "===================" << endl;
         cout << word << endl;
         RetrievalList(word);
     }
     result.Print();
+    */
     return result;
 }
 

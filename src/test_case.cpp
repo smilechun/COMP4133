@@ -2,6 +2,7 @@
 #include <iostream>
 #include "tools.h"
 #include "InvFile.h"
+#include "boolean.h"
 
 //int is_stop(string word, int ignore_case = 1);
 TEST(ToolsTest, is_stop__ignore_case) {
@@ -61,8 +62,14 @@ TEST(InvFileTest, add__1) {
 }
 
 TEST(InvFileTest, RetrievalBoolean__1) {
+    /*
     InvFile inv_file;
     inv_file.Build("data/post2.txt");
     vector<string> a({"parT", "helP", "Star"});
     inv_file.RetrievalBoolean(a);
+    */
+}
+
+TEST(BooleanTest, GetNextToken__1) {
+    Boolean("word AND (b OR c)  ");
 }

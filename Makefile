@@ -13,7 +13,7 @@ LIBDIR := lib/include
 LIB_SRC_DIR := lib
 
 # Files to be compiled
-OBJS := $(addprefix $(OBJDIR)/,tools.o InvFile.o)
+OBJS := $(addprefix $(OBJDIR)/,tools.o InvFile.o boolean.o)
 
 .DEFAULT_GOAL := default
 
