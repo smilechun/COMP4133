@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stack>
 #include "boolean.h"
+#include <cstdlib>
 
 #define HASH_INIT_SIZE 330000
 
@@ -18,7 +19,7 @@ size_t RetrievalResult::Size() {
 }
 void RetrievalResult::Print() {
     for(auto i : result) {
-        cout << "PRINT:" << i.first << endl;
+        cout << "PRINT:" << Global_Tools->get_trec_map(i.first) << endl;
     }
 }
 void RetrievalResult::Union(RetrievalResult r2) {
@@ -52,21 +53,23 @@ InvFile::~InvFile() {
 }
 
 void InvFile::Build(string filename) {
-    int _docID = -1;
+    int count = 0;
     ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Cannot open file: " << filename << endl;
+        abort();
+    } else {
+        cout << "Loading file " << filename << endl;
+    }
     string line;
     while(getline(file, line)) {
         //docnO 0 1
         size_t space1 = line.find(" ");
         size_t space2 = line.find(" ", space1+1);
         int docID = stoi(line.substr(space1+1, space2-space1));
-        if (_docID < docID) {
-            _docID++;
-            if(!(_docID % 10000))
-                cout << _docID << endl;
-        }
         Add(line.substr(0, space1), docID);
     }
+    cout << endl;
 }
 
 void InvFile::Add(string stem_word, DocID docid) {

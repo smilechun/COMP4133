@@ -6,7 +6,7 @@
 
 //int is_stop(string word, int ignore_case = 1);
 TEST(ToolsTest, is_stop__ignore_case) {
-	tools mytools("data/estop.lst");
+	tools mytools("data/stopword/estop.lst", "data/file.txt");
 	ASSERT_TRUE(mytools.is_stop("is"));
 	ASSERT_TRUE(mytools.is_stop("Is"));
 	ASSERT_TRUE(mytools.is_stop("IS"));
@@ -16,7 +16,7 @@ TEST(ToolsTest, is_stop__ignore_case) {
 }
 
 TEST(ToolsTest, is_stop__case_sensitive) {
-	tools mytools("data/estop.lst");
+	tools mytools("data/stopword/estop.lst", "data/file.txt");
 	ASSERT_TRUE(mytools.is_stop("is", 0));
 	ASSERT_FALSE(mytools.is_stop("Is", 0));
 	ASSERT_FALSE(mytools.is_stop("iS", 0));
@@ -28,7 +28,7 @@ TEST(ToolsTest, is_stop__case_sensitive) {
 TEST(ToolsTest, stem__1) {
 	string str = "original";
 	string str2 = "origin";
-	tools mytools("data/estop.lst");
+	tools mytools("data/stopword/estop.lst", "data/file.txt");
 	str = mytools.stem(str);
 	str2 = mytools.stem(str2);
 	ASSERT_STREQ(str.c_str(), str2.c_str());
@@ -38,7 +38,7 @@ TEST(ToolsTest, stem__2) {
 	string str = "changed";
 	string str2 = "change";
 	string str3 = "changing";
-	tools mytools("data/estop.lst");
+	tools mytools("data/stopword/estop.lst", "data/file.txt");
 	str = mytools.stem(str);
 	str2 = mytools.stem(str2);
 	str3 = mytools.stem(str3);
@@ -63,12 +63,12 @@ TEST(InvFileTest, add__1) {
 
 TEST(InvFileTest, RetrievalBoolean__1) {
     InvFile inv_file;
-    inv_file.Build("data/post2.txt");
+    inv_file.Build("data/data/post2.txt");
     inv_file.RetrievalBoolean("a AND b OR c");
 }
 TEST(InvFileTest, RetrievalBoolean__2) {
     InvFile inv_file;
-    inv_file.Build("data/post1.txt");
+    inv_file.Build("data/data/post1.txt");
     inv_file.RetrievalBoolean("Turkey AND Iraq AND water").Print();
 }
 

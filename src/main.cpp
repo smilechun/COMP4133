@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
     // Initialization
-    Global_Tools = new tools("data/estop.lst");
+    Global_Tools = new tools("data/stopword/estop.lst", "data/file.txt");
 
 #ifdef RUN_GTEST
 	::testing::InitGoogleTest(&argc, argv);
