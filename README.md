@@ -16,3 +16,8 @@ Move to the project directory.
 
 # Testing
 This program has been tested on Fedora 24.
+
+# Run
+Place _post1.txt_ into _data/data/_ directory.
+
+`comp4133 data/query/queryT'

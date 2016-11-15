@@ -108,7 +108,7 @@ size_t InvFile::GetDF(string stem_word) {
     }
 }
 
-// query = a AND ( b OR c)
+// query = "a AND ( b OR c)"
 RetrievalResult InvFile::RetrievalBoolean(string query) {
     stack<RetrievalResult> mystack;
     Boolean b(query);
