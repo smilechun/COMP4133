@@ -2,19 +2,32 @@
 #include <stdio.h>
 #include <iostream>
 #include <stack>
+#include <sstream>
 using namespace std;
 
 Boolean::Boolean(string infix) : infix_str(infix),begin_pos(0) {
-    cout << infix_str << endl;
     InfixToPostfix();
-    cout << postfix_str << endl;
+}
+
+vector<string> Boolean::GetPostfixExp() {
+    return postfix;
+}
+
+string Boolean::GetPostfixStr() {
+    stringstream ss;
+    for(size_t i=0; i<postfix.size(); i++) {
+        if(i!=0)
+            ss << " ";
+        ss << postfix[i];
+    }
+    return ss.str();
 }
 
 int is_operator(char c) {
     return ( c=='A' || c=='O' || c=='B' || c=='(' || c==')' );
 }
 
-string Boolean::GetNextToken() {
+string Boolean::_GetNextToken_infix() {
     const char *p = infix_str.c_str()+begin_pos;
     const char *start = 0;
     int size = 0;
@@ -63,14 +76,14 @@ string Boolean::GetNextToken() {
 void Boolean::InfixToPostfix() {
     string token;
     stack<string> mystack;
-    while(!(token = GetNextToken()).empty()) {
+    while(!(token = _GetNextToken_infix()).empty()) {
         if(!is_operator(token[0])) {
-            postfix_str += token + " ";
+            postfix.push_back(token);
         } else if(token=="(") {
             mystack.push(token);
         } else if(token==")") {
             while(!mystack.empty() && mystack.top() != "(") {
-                postfix_str += mystack.top() + " ";
+                postfix.push_back(mystack.top());
                 mystack.pop();
             }
             mystack.pop();  //pop left parenthesis
@@ -80,7 +93,7 @@ void Boolean::InfixToPostfix() {
                 mystack.push(token);
             } else {
                 while(!mystack.empty() && mystack.top() != "(") {
-                    postfix_str += mystack.top() + " ";
+                    postfix.push_back(mystack.top());
                     mystack.pop();
                 }
                 mystack.push(token);
@@ -88,7 +101,7 @@ void Boolean::InfixToPostfix() {
         }
     }
     while(!mystack.empty()) {
-        postfix_str += mystack.top() + " ";
+        postfix.push_back(mystack.top());
         mystack.pop();
     }
 }

@@ -1,6 +1,6 @@
 # Compiler options
 CC := g++
-CFLAGS := -std=c++11
+CFLAGS := -std=c++11 -g
 #CFLAGS := -Wall -Wextra -pedantic
 
 # Directories structure
@@ -40,7 +40,7 @@ $(OBJDIR):
 # Build test case, needs Google Test library
 test: $(OBJS) $(OBJDIR)/stem.o main_test $(OBJDIR)/test_case.o
 	@echo Building comp4133 and test cases, this creates a dependency on Google Test library.
-	@$(CC) -o comp4133 $(OBJS) $(OBJDIR)/stem.o $(OBJDIR)/test_case.o $(OBJDIR)/main.o -lgtest -lpthread
+	@$(CC) -o comp4133 $(OBJS) $(OBJDIR)/stem.o $(CFLAGS) $(OBJDIR)/test_case.o $(OBJDIR)/main.o -lgtest -lpthread
 
 $(OBJDIR)/test_case.o: $(OBJDIR) $(SRCDIR)/test_case.cpp
 	@echo Building test_case.o

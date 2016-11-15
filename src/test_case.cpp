@@ -71,5 +71,22 @@ TEST(InvFileTest, RetrievalBoolean__1) {
 }
 
 TEST(BooleanTest, GetNextToken__1) {
-    Boolean("word AND (b OR c)  ");
+    Boolean b("word AND (b OR c)  ");
+    ASSERT_STREQ("word b c OR AND", b.GetPostfixStr().c_str());
+}
+TEST(BooleanTest, GetNextToken__2) {
+    Boolean b("     word OR b OR c ");
+    ASSERT_STREQ("word b OR c OR", b.GetPostfixStr().c_str());
+}
+TEST(BooleanTest, GetNextToken__3) {
+    Boolean b("(word OR b) OR c ");
+    ASSERT_STREQ("word b OR c OR", b.GetPostfixStr().c_str());
+}
+TEST(BooleanTest, GetNextToken__4) {
+    Boolean b("(word OR b OR c ) AND x");
+    ASSERT_STREQ("word b OR c OR x AND", b.GetPostfixStr().c_str());
+}
+TEST(BooleanTest, GetNextToken__5) {
+    Boolean b("X AND (word OR (b AND c) ) AND x");
+    ASSERT_STREQ("X word b c AND OR AND x AND", b.GetPostfixStr().c_str());
 }

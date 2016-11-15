@@ -3,6 +3,8 @@
 #include <fstream>
 #include <algorithm>
 
+#define HASH_INIT_SIZE 330000
+
 void RetrievalResult::Add(DocID docID, Score score) {
     RetrievalDoc doc;
     doc.docID = docID;
@@ -15,9 +17,10 @@ void RetrievalResult::Print() {
     }
 }
 
-InvFile::InvFile() {
+InvFile::InvFile(): inv_file(HASH_INIT_SIZE) {
     doc_count = 0;
 }
+
 InvFile::~InvFile() {
 }
 
@@ -85,6 +88,10 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
 }
 
 void InvFile::DebugPrint() {
+    cout <<"DEBUG" <<inv_file.size() << endl;
+    cout <<"DEBUG" <<inv_file.bucket_count() << endl;
+
+    /*
 	std::cout << "inv_file buckets contain:\n";
 	for ( unsigned i = 0; i < inv_file.bucket_count(); ++i) {
 		std::cout << "bucket #" << i << " contains:";
@@ -92,6 +99,7 @@ void InvFile::DebugPrint() {
 			std::cout << " " << local_it->first; // << ":" << local_it->second;
 		std::cout << std::endl;
 	}
+    */
 }
 
 HNode* InvFile::RetrievalList(string stem_word) {
