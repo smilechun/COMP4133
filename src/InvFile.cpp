@@ -17,9 +17,14 @@ void RetrievalResult::Add(DocID docID, Score score) {
 size_t RetrievalResult::Size() {
     return result.size();
 }
-void RetrievalResult::Print() {
-    for(auto i : result) {
-        cout << "PRINT:" << Global_Tools->get_trec_map(i.first) << endl;
+void RetrievalResult::Print(int queryID) {
+    int count = 0;
+    for(auto i: result) {
+        cout << queryID << " 0 " << Global_Tools->get_trec_map(i.first) << " "
+             << count << " " << 1000 - count << " HKPU-1" << endl;
+        count++;
+        if(count>=1000)
+            break;
     }
 }
 void RetrievalResult::Union(RetrievalResult r2) {
@@ -59,7 +64,7 @@ void InvFile::Build(string filename) {
         cerr << "Cannot open file: " << filename << endl;
         abort();
     } else {
-        cout << "Loading file " << filename << endl;
+        cout << "Loading file: " << filename << endl;
     }
     string line;
     while(getline(file, line)) {
@@ -115,23 +120,15 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
             RetrievalResult a = mystack.top(); mystack.pop();
             RetrievalResult b = mystack.top(); mystack.pop();
             if(i=="AND") {
-                a.Intersect(b);
+                b.Intersect(a);
             } else if (i=="OR") {
-                a.Union(b);
+                b.Union(a);
             } else if (i=="BUT") {
-                a.Complement(b);
+                b.Complement(a);
             }
-            mystack.push(a);
+            mystack.push(b);
         }
     }
-    /*
-    for(const string &word : query) {
-        cout << "===================" << endl;
-        cout << word << endl;
-        RetrievalList(word);
-    }
-    result.Print();
-    */
     return mystack.top();
 }
 

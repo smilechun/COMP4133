@@ -201,7 +201,7 @@ class stemmer {
   public:
         //char LAMBDA[1] = "";        /* the constant empty string */
         char *end;                  /* pointer to the end of the word */
-	char tmpstr[1000];
+	char tmpstr[10000];
 
 /*****************************************************************************/
 /********************   Private Function Declarations   **********************/

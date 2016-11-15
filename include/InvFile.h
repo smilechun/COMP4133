@@ -25,7 +25,7 @@ class RetrievalResult {
 public:
     void Add(DocID docID, Score score);
     size_t Size();
-    void Print();
+    void Print(int queryID);
     void Union(RetrievalResult r2);
     void Intersect(RetrievalResult r2);
     void Complement(RetrievalResult r2);

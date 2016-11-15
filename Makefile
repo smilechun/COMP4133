@@ -1,6 +1,6 @@
 # Compiler options
 CC := g++
-CFLAGS := -std=c++11 -O3
+CFLAGS := -std=c++11 -O3 -g
 #CFLAGS := -Wall -Wextra -pedantic
 
 # Directories structure
@@ -13,7 +13,7 @@ LIBDIR := lib/include
 LIB_SRC_DIR := lib
 
 # Files to be compiled
-OBJS := $(addprefix $(OBJDIR)/,tools.o InvFile.o boolean.o)
+OBJS := $(addprefix $(OBJDIR)/,tools.o InvFile.o boolean.o query_set.o)
 
 .DEFAULT_GOAL := default
 

@@ -69,7 +69,7 @@ TEST(InvFileTest, RetrievalBoolean__1) {
 TEST(InvFileTest, RetrievalBoolean__2) {
     InvFile inv_file;
     inv_file.Build("data/data/post1.txt");
-    inv_file.RetrievalBoolean("Turkey AND Iraq AND water").Print();
+    inv_file.RetrievalBoolean("Great AND Britain AND health AND care").Print(601);
 }
 
 TEST(BooleanTest, GetNextToken__1) {
