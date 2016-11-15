@@ -29,8 +29,8 @@ TEST(ToolsTest, stem__1) {
 	string str = "original";
 	string str2 = "origin";
 	tools mytools("data/estop.lst");
-	mytools.stem(str);
-	mytools.stem(str2);
+	str = mytools.stem(str);
+	str2 = mytools.stem(str2);
 	ASSERT_STREQ(str.c_str(), str2.c_str());
 }
 
@@ -39,9 +39,9 @@ TEST(ToolsTest, stem__2) {
 	string str2 = "change";
 	string str3 = "changing";
 	tools mytools("data/estop.lst");
-	mytools.stem(str);
-	mytools.stem(str2);
-	mytools.stem(str3);
+	str = mytools.stem(str);
+	str2 = mytools.stem(str2);
+	str3 = mytools.stem(str3);
 	ASSERT_STREQ(str.c_str(), str2.c_str());
 	ASSERT_STREQ(str.c_str(), str3.c_str());
 }
@@ -62,12 +62,14 @@ TEST(InvFileTest, add__1) {
 }
 
 TEST(InvFileTest, RetrievalBoolean__1) {
-    /*
     InvFile inv_file;
     inv_file.Build("data/post2.txt");
-    vector<string> a({"parT", "helP", "Star"});
-    inv_file.RetrievalBoolean(a);
-    */
+    inv_file.RetrievalBoolean("a AND b OR c");
+}
+TEST(InvFileTest, RetrievalBoolean__2) {
+    InvFile inv_file;
+    inv_file.Build("data/post1.txt");
+    inv_file.RetrievalBoolean("Turkey AND Iraq AND water").Print();
 }
 
 TEST(BooleanTest, GetNextToken__1) {

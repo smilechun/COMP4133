@@ -1,5 +1,6 @@
 #include "tools.h"
 #include <algorithm>
+class tools *Global_Tools;
 
 // Delete the trailing newline and carriage return of a line
 void FilterTrailNewline(char * line) {
@@ -59,6 +60,8 @@ int tools::is_stop(string word, int ignore_case) {
 	return stop_list.find(word) != stop_list.end();
 }
 
-void tools::stem(string &word) {
-	stem_proc.Stem(word);
+string tools::stem(string word) {
+    string tempword(word);
+	stem_proc.Stem(tempword);
+    return tempword;
 }

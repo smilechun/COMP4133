@@ -9,6 +9,8 @@ public:
     Boolean(string infix);
     vector<string> GetPostfixExp();
     string GetPostfixStr();
+    // AND OR BUT ( ), only check the first byte
+    static int IsOperator(string s);
 private:
     string infix_str;
     vector<string> postfix;

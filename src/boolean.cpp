@@ -23,7 +23,10 @@ string Boolean::GetPostfixStr() {
     return ss.str();
 }
 
-int is_operator(char c) {
+int Boolean::IsOperator(string s) {
+    if(s.size() == 0)
+        return false;
+    char c = s[0];
     return ( c=='A' || c=='O' || c=='B' || c=='(' || c==')' );
 }
 
@@ -62,7 +65,7 @@ string Boolean::_GetNextToken_infix() {
     } else {
         //token word
         while(*p != '\0') {
-            if (*p == ' ' || is_operator(*p))
+            if (*p == ' ' || IsOperator(string(1,*p)))
                 break;
             p++;
             size++;
@@ -77,7 +80,7 @@ void Boolean::InfixToPostfix() {
     string token;
     stack<string> mystack;
     while(!(token = _GetNextToken_infix()).empty()) {
-        if(!is_operator(token[0])) {
+        if(!IsOperator(string(1,token[0]))) {
             postfix.push_back(token);
         } else if(token=="(") {
             mystack.push(token);

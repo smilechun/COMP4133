@@ -24,9 +24,13 @@ public:
 class RetrievalResult {
 public:
     void Add(DocID docID, Score score);
+    size_t Size();
     void Print();
+    void Union(RetrievalResult r2);
+    void Intersect(RetrievalResult r2);
+    void Complement(RetrievalResult r2);
 private:
-    vector<RetrievalDoc> result;
+    map<DocID, RetrievalDoc> result;
 };
 
 class InvFile {
@@ -41,6 +45,7 @@ public:
     // Retrieval functions
     size_t GetDF(string stem_word);
     RetrievalResult RetrievalBoolean(string query);
+    RetrievalResult RetrieveExist(string query);
     
     // Debug
     void DebugPrint();

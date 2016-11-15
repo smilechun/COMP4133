@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <stack>
+#include "boolean.h"
 
 #define HASH_INIT_SIZE 330000
 
@@ -9,12 +11,37 @@ void RetrievalResult::Add(DocID docID, Score score) {
     RetrievalDoc doc;
     doc.docID = docID;
     doc.score = score;
-    result.push_back(doc);
+    result[docID] = doc;
+}
+size_t RetrievalResult::Size() {
+    return result.size();
 }
 void RetrievalResult::Print() {
     for(auto i : result) {
-        cout << "PRINT:" << i.docID << endl;
+        cout << "PRINT:" << i.first << endl;
     }
+}
+void RetrievalResult::Union(RetrievalResult r2) {
+    result.insert(r2.result.begin(), r2.result.end());
+}
+void RetrievalResult::Intersect(RetrievalResult r2) {
+    map<DocID, RetrievalDoc>::const_iterator left = result.begin();
+    map<DocID, RetrievalDoc>::const_iterator right = r2.result.begin();
+    while(left!=result.end() && right!=r2.result.end()) {
+        if(left->first < right->first) {
+            left = result.erase(left);
+        } else if(left->first > right->first) {
+            right++;
+        } else {
+            left++;
+            right++;
+        }
+    }
+    while(left!=result.end()) {
+        left = result.erase(left);
+    }
+}
+void RetrievalResult::Complement(RetrievalResult r2) {
 }
 
 InvFile::InvFile(): inv_file(HASH_INIT_SIZE) {
@@ -35,7 +62,7 @@ void InvFile::Build(string filename) {
         int docID = stoi(line.substr(space1+1, space2-space1));
         if (_docID < docID) {
             _docID++;
-            if(!(_docID % 1000))
+            if(!(_docID % 10000))
                 cout << _docID << endl;
         }
         Add(line.substr(0, space1), docID);
@@ -73,9 +100,27 @@ size_t InvFile::GetDF(string stem_word) {
     }
 }
 
-// a AND ( b OR c)
+// query = a AND ( b OR c)
 RetrievalResult InvFile::RetrievalBoolean(string query) {
-    RetrievalResult result;
+    stack<RetrievalResult> mystack;
+    Boolean b(query);
+    for(auto i: b.GetPostfixExp()) {
+        if(!Boolean::IsOperator(i)) {
+            string temp = Global_Tools->stem(i);
+            mystack.push(RetrieveExist(temp));
+        } else {
+            RetrievalResult a = mystack.top(); mystack.pop();
+            RetrievalResult b = mystack.top(); mystack.pop();
+            if(i=="AND") {
+                a.Intersect(b);
+            } else if (i=="OR") {
+                a.Union(b);
+            } else if (i=="BUT") {
+                a.Complement(b);
+            }
+            mystack.push(a);
+        }
+    }
     /*
     for(const string &word : query) {
         cout << "===================" << endl;
@@ -84,6 +129,19 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
     }
     result.Print();
     */
+    return mystack.top();
+}
+
+RetrievalResult InvFile::RetrieveExist(string query) {
+    RetrievalResult result;
+    _InvFile::iterator ret = inv_file.find(query);
+    if (ret == inv_file.end()) {
+        return result;
+    } else {
+        for(auto i:ret->second) {
+            result.Add(i.first, 1);
+        }
+    }
     return result;
 }
 
