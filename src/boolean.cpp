@@ -23,8 +23,11 @@ string Boolean::GetPostfixStr() {
     return ss.str();
 }
 
-int Boolean::IsOperator(string s) {
-    return ( s=="AND" || s=="OR" || s=="BUT" || s=="(" || s==")" );
+int Boolean::IsOperator(const char c) {
+    return ( c=='&' || c=='|' || c=='^' || c=='(' || c==')' );
+}
+int Boolean::IsOperator(string c) {
+    return c.size()>0 ? IsOperator(c[0]) : 0;
 }
 
 string Boolean::_GetNextToken_infix() {
@@ -44,25 +47,13 @@ string Boolean::_GetNextToken_infix() {
         return "";  //empty result
 
     start = p;
-    if(*p == 'A' && *(p+1)=='N' && *(p+1)=='D') {
-        size+=3;
-        ret = "AND";
-    } else if (*p == 'O' && *(p+1)=='R') {
-        size+=2;
-        ret = "OR";
-    } else if (*p == '(') {
+    if(IsOperator(*p)) {
         size+=1;
-        ret = "(";
-    } else if (*p == ')') {
-        size+=1;
-        ret = ")";
-    } else if (*p == 'B' && *(p+2)=='U' && *(p+3)=='T') {
-        size+=3;
-        ret = "BUT";
+        ret = string(1,*p);
     } else {
         //token word
         while(*p != '\0') {
-            if (*p == ' ' || *p=='(' || *p==')')
+            if (*p == ' ' || IsOperator(*p))
                 break;
             p++;
             size++;
@@ -88,7 +79,7 @@ void Boolean::InfixToPostfix() {
             }
             mystack.pop();  //pop left parenthesis
         } else {
-            //operator: AND OR BUT
+            //operator: & | ^
             if(mystack.empty() || mystack.top() == "(") {
                 mystack.push(token);
             } else {

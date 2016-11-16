@@ -15,8 +15,6 @@ QuerySet::QuerySet(string filename) {
     if (!file.is_open()) {
         cerr << "Cannot open file: " << filename << endl;
         abort();
-    } else {
-        cout << "Loading file: " << filename << endl;
     }
     string line;
     while(getline(file, line)) {
@@ -26,7 +24,6 @@ QuerySet::QuerySet(string filename) {
         string query = line.substr(space1+1, line.length()-space1-1);
         queries.push_back(pair<int, string>(queryID, query));
     }
-    cout << endl;
 
     // Judge whether the query is long or short
     if (queries[0].second.length()<=LONG_QUERY_THRESHOLD) {
@@ -68,7 +65,7 @@ void BooleanModel::operator() (Query q) {
     vector<string> tokens = split(rtrim(q.second));
     stringstream ss;
     for(int i=0; i<tokens.size()-1; i++) {
-        ss << tokens[i] << " AND ";
+        ss << tokens[i] << " & ";
     }
     ss << tokens[tokens.size()-1];
 

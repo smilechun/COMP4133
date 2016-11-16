@@ -64,31 +64,31 @@ TEST(InvFileTest, add__1) {
 TEST(InvFileTest, RetrievalBoolean__1) {
     InvFile inv_file;
     inv_file.Build("data/data/post2.txt");
-    inv_file.RetrievalBoolean("a AND b OR c");
+    inv_file.RetrievalBoolean("a & b | c");
 }
 TEST(InvFileTest, RetrievalBoolean__2) {
     InvFile inv_file;
     inv_file.Build("data/data/post1.txt");
-    inv_file.RetrievalBoolean("Great AND Britain AND health AND care").Print(601);
+    inv_file.RetrievalBoolean("Great & Britain & health & care").Print(601);
 }
 
 TEST(BooleanTest, GetNextToken__1) {
-    Boolean b("word AND (b OR c)  ");
-    ASSERT_STREQ("word b c OR AND", b.GetPostfixStr().c_str());
+    Boolean b("word & (b | c)  ");
+    ASSERT_STREQ("word b c | &", b.GetPostfixStr().c_str());
 }
 TEST(BooleanTest, GetNextToken__2) {
-    Boolean b("     word OR b OR c ");
-    ASSERT_STREQ("word b OR c OR", b.GetPostfixStr().c_str());
+    Boolean b("     word | b | c ");
+    ASSERT_STREQ("word b | c |", b.GetPostfixStr().c_str());
 }
 TEST(BooleanTest, GetNextToken__3) {
-    Boolean b("(word OR b) OR c ");
-    ASSERT_STREQ("word b OR c OR", b.GetPostfixStr().c_str());
+    Boolean b("(word | b) | c ");
+    ASSERT_STREQ("word b | c |", b.GetPostfixStr().c_str());
 }
 TEST(BooleanTest, GetNextToken__4) {
-    Boolean b("(word OR b OR c ) AND x");
-    ASSERT_STREQ("word b OR c OR x AND", b.GetPostfixStr().c_str());
+    Boolean b("(word | b | c ) & x");
+    ASSERT_STREQ("word b | c | x &", b.GetPostfixStr().c_str());
 }
 TEST(BooleanTest, GetNextToken__5) {
-    Boolean b("X AND (word OR (b AND c) ) AND x");
-    ASSERT_STREQ("X word b c AND OR AND x AND", b.GetPostfixStr().c_str());
+    Boolean b("X & (word | (b & c) ) & x");
+    ASSERT_STREQ("X word b c & | & x &", b.GetPostfixStr().c_str());
 }

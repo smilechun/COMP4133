@@ -5,6 +5,7 @@
 #include <stack>
 #include "boolean.h"
 #include <cstdlib>
+#include <cmath>
 
 #define HASH_INIT_SIZE 330000
 
@@ -48,6 +49,18 @@ void RetrievalResult::Intersect(RetrievalResult r2) {
     }
 }
 void RetrievalResult::Complement(RetrievalResult r2) {
+    map<DocID, RetrievalDoc>::const_iterator left = result.begin();
+    map<DocID, RetrievalDoc>::const_iterator right = r2.result.begin();
+    while(left!=result.end() && right!=r2.result.end()) {
+        if(left->first < right->first) {
+            left++;
+        } else if(left->first > right->first) {
+            right++;
+        } else {
+            left = result.erase(left);
+            right++;
+        }
+    }
 }
 
 InvFile::InvFile(): inv_file(HASH_INIT_SIZE) {
@@ -59,22 +72,21 @@ InvFile::~InvFile() {
 
 void InvFile::Build(string filename) {
     int count = 0;
+    int docID;
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Cannot open file: " << filename << endl;
         abort();
-    } else {
-        cout << "Loading file: " << filename << endl;
     }
     string line;
     while(getline(file, line)) {
         //docnO 0 1
         size_t space1 = line.find(" ");
         size_t space2 = line.find(" ", space1+1);
-        int docID = stoi(line.substr(space1+1, space2-space1));
+        docID = stoi(line.substr(space1+1, space2-space1));
         Add(line.substr(0, space1), docID);
     }
-    cout << endl;
+    doc_count = docID+1;    //docID start from 0
 }
 
 void InvFile::Add(string stem_word, DocID docid) {
@@ -108,7 +120,14 @@ size_t InvFile::GetDF(string stem_word) {
     }
 }
 
-// query = "a AND ( b OR c)"
+double InvFile::GetIDF(string stem_word) {
+    int df = GetDF(stem_word);
+    if(df==0)
+        return 0;
+    return log2(doc_count*1.0/df);
+}
+
+// query = "a & ( b | c)"
 RetrievalResult InvFile::RetrievalBoolean(string query) {
     stack<RetrievalResult> mystack;
     Boolean b(query);
@@ -119,11 +138,11 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
         } else {
             RetrievalResult a = mystack.top(); mystack.pop();
             RetrievalResult b = mystack.top(); mystack.pop();
-            if(i=="AND") {
+            if(i=="&") {
                 b.Intersect(a);
-            } else if (i=="OR") {
+            } else if (i=="|") {
                 b.Union(a);
-            } else if (i=="BUT") {
+            } else if (i=="^") {
                 b.Complement(a);
             }
             mystack.push(b);

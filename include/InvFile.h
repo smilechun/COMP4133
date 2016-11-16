@@ -44,6 +44,7 @@ public:
 
     // Retrieval functions
     size_t GetDF(string stem_word);
+    double GetIDF(string stem_word);
     RetrievalResult RetrievalBoolean(string query);
     RetrievalResult RetrieveExist(string query);
     

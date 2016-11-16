@@ -10,6 +10,7 @@ public:
     vector<string> GetPostfixExp();
     string GetPostfixStr();
     // AND OR BUT ( ), only check the first byte
+    static int IsOperator(const char c);
     static int IsOperator(string s);
 private:
     string infix_str;
