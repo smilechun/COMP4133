@@ -72,7 +72,8 @@ InvFile::~InvFile() {
 
 void InvFile::Build(string filename) {
     int count = 0;
-    int docID;
+    DocID docID;
+	Offset offset;
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Cannot open file: " << filename << endl;
@@ -82,32 +83,33 @@ void InvFile::Build(string filename) {
     while(getline(file, line)) {
         //docnO 0 1
         size_t space1 = line.find(" ");
-        size_t space2 = line.find(" ", space1+1);
-        docID = stoi(line.substr(space1+1, space2-space1));
-        Add(line.substr(0, space1), docID);
+		size_t space2 = line.find(" ", space1 + 1);
+		docID = stoi(line.substr(space1 + 1, space2 - space1));
+		offset = stoi(line.substr(space2 + 1));
+        Add(line.substr(0, space1), docID, offset);
     }
     doc_count = docID+1;    //docID start from 0
 }
 
-void InvFile::Add(string stem_word, DocID docid) {
+void InvFile::Add(string stem_word, DocID docid, Offset offset) {
 	auto iter = inv_file.find(stem_word);
 	if (iter == inv_file.end()) {
 		// insert new word
-		HNode hnode = HNode({Post(docid, 1)});
+		HNode hnode;
+		hnode[docid] = Posts({ offset });
 		inv_file[stem_word] = hnode;
 	} else {
         // insert into existing word
         // No need a new hnode, just add a new Post into hnode
-        auto last_post = iter->second.rbegin();
-        if (last_post->first == docid) {
-            // last_post is the same as the current docid
-            // then increase the term frequency
-            last_post->second++;
-        } else {
-            // the docid is not the same
-            // insert a new post
-            iter->second.push_back({Post(docid, 1)});
-        }
+		auto posts = iter->second.find(docid);
+		if (posts == iter->second.end()) {
+			// insert a new document
+			Posts p({ offset });
+			iter->second.insert(posts, HNode::value_type(docid, p));
+		} else {
+			// document exists, insert a new offset into list
+			posts->second.push_back(offset);
+		}
     }
 }
 
