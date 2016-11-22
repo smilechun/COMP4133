@@ -12,10 +12,11 @@
 
 using namespace std;
 typedef int DocID;
+typedef int Offset;
 typedef double Score;
 
-using Post = pair<int, int>;
-using HNode = list<Post>;
+using Posts = list<Offset>;
+using HNode = map<DocID, Posts>;
 
 class RetrievalDoc {
 public:
@@ -52,8 +53,8 @@ public:
     
     // Init functions
     void Build(string filename);
-    void Add(string s, DocID docid);
-    
+	void Add(string stem_word, DocID docid, Offset offset);
+
     // Retrieval functions
     size_t GetDF(string stem_word);
     double GetIDF(string stem_word);
