@@ -30,7 +30,7 @@ int Boolean::IsOperator(string c) {
     return c.size()>0 ? IsOperator(c[0]) : 0;
 }
 
-string Boolean::_GetNextToken_infix() {
+string Boolean::GetNextToken_infix() {
     const char *p = infix_str.c_str()+begin_pos;
     const char *start = 0;
     int size = 0;
@@ -67,7 +67,7 @@ string Boolean::_GetNextToken_infix() {
 void Boolean::InfixToPostfix() {
     string token;
     stack<string> mystack;
-    while(!(token = _GetNextToken_infix()).empty()) {
+    while(!(token = GetNextToken_infix()).empty()) {
         if(!IsOperator(token)) {
             postfix.push_back(token);
         } else if(token=="(") {

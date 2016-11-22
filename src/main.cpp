@@ -19,9 +19,14 @@ int main(int argc, char** argv) {
     Global_Tools = new tools("data/stopword/estop.lst", "data/file.txt");
     InvFile inv;
     inv.Build("data/data/post1.txt");
+    inv.BuildDocument(TF_double_norm_K, IDF_idf);
     QuerySet querySet(argv[1]);
-    BooleanModel bm(&inv);
-    querySet.IterateQueries(bm);
+    BooleanModelEnhanced bme(&inv);
+    querySet.IterateQueries(bme);
+    //BooleanModel bm(&inv);
+    //querySet.IterateQueries(bm);
+    //VSM vsm(&inv);
+    //querySet.IterateQueries(vsm);
 
 #ifdef RUN_GTEST
 	::testing::InitGoogleTest(&argc, argv);

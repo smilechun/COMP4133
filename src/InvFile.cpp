@@ -6,6 +6,7 @@
 #include "boolean.h"
 #include <cstdlib>
 #include <cmath>
+#include <sstream>
 
 #define HASH_INIT_SIZE 330000
 
@@ -23,6 +24,27 @@ void RetrievalResult::Print(int queryID) {
     for(auto i: result) {
         cout << queryID << " 0 " << Global_Tools->get_trec_map(i.first) << " "
              << count << " " << 1000 - count << " HKPU-1" << endl;
+        count++;
+        if(count>=1000)
+            break;
+    }
+}
+bool VSM_cmp (RetrievalDoc d1, RetrievalDoc d2) {
+    return d1.score>d2.score;
+}
+void RetrievalResult::PrintVSM(int queryID) {
+    // Sort result
+    vector<RetrievalDoc> docs;
+    for (auto i: result) {
+        docs.push_back(i.second);
+    }
+    sort(docs.begin(), docs.end(), VSM_cmp);
+
+    // Print result
+    int count = 0;
+    for(auto i: docs) {
+        cout << queryID << " 0 " << Global_Tools->get_trec_map(i.docID) << " "
+             << count << " " << i.score << " HKPU-1" << endl;
         count++;
         if(count>=1000)
             break;
@@ -48,6 +70,7 @@ void RetrievalResult::Intersect(RetrievalResult r2) {
         left = result.erase(left);
     }
 }
+
 void RetrievalResult::Complement(RetrievalResult r2) {
     map<DocID, RetrievalDoc>::const_iterator left = result.begin();
     map<DocID, RetrievalDoc>::const_iterator right = r2.result.begin();
@@ -63,11 +86,74 @@ void RetrievalResult::Complement(RetrievalResult r2) {
     }
 }
 
+void RetrievalResult::JoinVSM(RetrievalResult r2) {
+    for(auto i: r2.result) {
+        auto got = result.find(i.first);
+        if (got==result.end()) {
+            result.insert(i);
+        } else {
+            got->second.score += i.second.score;
+        }
+    }
+}
+
+void RetrievalResult::NormalizeVSM(DocumentList *docList) {
+    for(auto &i: result) {
+        i.second.score /= docList->DocGetLen(i.first);
+    }
+}
+
 InvFile::InvFile(): inv_file(HASH_INIT_SIZE) {
     doc_count = 0;
+    docList = 0;
 }
 
 InvFile::~InvFile() {
+}
+
+void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
+    if (docList != 0)
+        delete docList; 
+    docList = new DocumentList(doc_count);
+    this->cal_tf = cal_tf;
+    this->cal_idf = cal_idf;
+    // ===================================
+    //  Step 1:
+    //  Build max_tf, sum_tf, unique_terms
+    // ===================================
+    // Loop through all hnodes
+    cerr << "S1" << endl;
+    for(auto i = inv_file.cbegin(); i != inv_file.cend(); i++) {
+        auto hnode = i->second;
+        // Loop through all post in a hnode
+        for(auto j = hnode.cbegin(); j != hnode.cend(); j++) {
+            // j->first = docID
+            // j->second = term freq
+            docList->DocAddTF(j->first, j->second);
+            docList->DocAddDF(j->first, hnode.size());
+        }
+    }
+    // ===================================
+    //  Step 2:
+    //  Build document length
+    // ===================================
+    // Loop through all hnodes
+    cerr << "S2" << endl;
+    for(auto i = inv_file.cbegin(); i != inv_file.cend(); i++) {
+        auto hnode = i->second;
+        // Loop through all post in a hnode
+        for(auto j = hnode.cbegin(); j != hnode.cend(); j++) {
+            // j->first = docID
+            // j->second = term freq
+            double tf = cal_tf(j->second, docList->DocGetMaxTF(j->first));
+            double idf = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(j->first));
+            double weight = tf*idf;
+            //cout << "WEIGHT" << tf << ":" << idf << ":" << weight << endl;
+            docList->DocAddWeight(j->first, weight);
+        }
+    }
+    docList->cal_avg();
+    cerr << "S3" << endl;
 }
 
 void InvFile::Build(string filename) {
@@ -136,16 +222,16 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
             string temp = Global_Tools->stem(i);
             mystack.push(RetrieveExist(temp));
         } else {
-            RetrievalResult a = mystack.top(); mystack.pop();
-            RetrievalResult b = mystack.top(); mystack.pop();
+            RetrievalResult r1 = mystack.top(); mystack.pop();
+            RetrievalResult r2 = mystack.top(); mystack.pop();
             if(i=="&") {
-                b.Intersect(a);
+                r2.Intersect(r1);
             } else if (i=="|") {
-                b.Union(a);
+                r2.Union(r1);
             } else if (i=="^") {
-                b.Complement(a);
+                r2.Complement(r1);
             }
-            mystack.push(b);
+            mystack.push(r2);
         }
     }
     return mystack.top();
@@ -161,6 +247,36 @@ RetrievalResult InvFile::RetrieveExist(string query) {
             result.Add(i.first, 1);
         }
     }
+    return result;
+}
+
+RetrievalResult InvFile::RetrievalVSM(string query) {
+    istringstream iss(query);
+    string token;
+    RetrievalResult result;
+    while(std::getline(iss, token, ' ')) {
+        if(token.empty() || Global_Tools->is_stop(token))
+            continue;
+        // Find all relevant documents
+        token = Global_Tools->stem(token);
+        auto got = inv_file.find(token);
+        if(got==inv_file.end()) {
+            // This term does not exist in any of the docs
+            continue;
+        }
+
+        // Process the documents that have df > 1 for this token
+        RetrievalResult tmp_result;
+        HNode hnode = got->second;
+        for(auto i: hnode) {
+            Score score = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(i.first));
+            tmp_result.Add(i.first, score*i.second);
+        }
+        result.JoinVSM(tmp_result);
+    }
+
+    // Normalize VSM final score
+    result.NormalizeVSM(docList);
     return result;
 }
 
@@ -185,4 +301,47 @@ HNode* InvFile::RetrievalList(string stem_word) {
         return &iter->second;
     };
     return 0;
+}
+
+//===============================================
+// TF functions
+//===============================================
+double TF_binary(int raw_freq, int max_freq) {
+    return raw_freq > 0;
+}
+
+double TF_raw_freq(int raw_freq, int max_freq) {
+    return raw_freq;
+}
+
+double TF_log_norm(int raw_freq, int max_freq) {
+    return 1 + log(raw_freq);
+}
+
+double TF_double_norm(int raw_freq, int max_freq) {
+    return raw_freq * 1.0 / max_freq;
+}
+
+double TF_double_norm_K(int raw_freq, int max_freq) {
+    return 0.4 + 0.6 * (1+log(raw_freq))/(1+log(max_freq));
+}
+
+double IDF_unary(int N, int df, int max_df) {
+    return 1;
+}
+
+double IDF_idf(int N, int df, int max_df) {
+    return log(N * 1.0 / df);
+}
+
+double IDF_idf_smooth(int N, int df, int max_df) {
+    return log(1 + df * 1.0 / df);
+}
+
+double IDF_idf_max(int N, int df, int max_df) {
+    return log(1 + max_df * 1.0 / df);
+}
+
+double IDF_prob_idf(int N, int df, int max_df) {
+    return log((N * 1.0 - df) / df);
 }

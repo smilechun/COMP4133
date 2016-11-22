@@ -17,7 +17,7 @@ private:
     vector<string> postfix;
     int begin_pos;
 
-    string _GetNextToken_infix();
+    string GetNextToken_infix();
     void InfixToPostfix();
 };
 #endif

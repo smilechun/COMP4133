@@ -13,8 +13,7 @@ using Query = pair<int, string>;
 class QuerySet {
 public:
     QuerySet(string filename);
-    template <class fn>
-    void IterateQueries(fn func);
+    void IterateQueries(function<void(Query)> fn);
 private:
     int long_query;
     vector<Query> queries;
@@ -23,6 +22,7 @@ private:
 vector<string> split(string str, char c = ' ');
 static inline std::string &rtrim(std::string &s);
 
+// A functor
 class BooleanModel {
 public:
     BooleanModel(InvFile *invFile);
@@ -31,10 +31,20 @@ private:
     InvFile *invFile;
 };
 
-template<class fn>
-void QuerySet::IterateQueries(fn func) {
-    for(auto i: queries) {
-        func(i);
-    }
-}
+class VSM {
+public:
+    VSM(InvFile *invFile);
+    void operator() (Query q);
+private:
+    InvFile *invFile;
+};
+
+class BooleanModelEnhanced {
+public:
+    BooleanModelEnhanced(InvFile *invfile);
+    void operator() (Query q);
+private:
+    InvFile *invFile;
+};
+
 #endif

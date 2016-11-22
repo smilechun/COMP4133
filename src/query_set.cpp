@@ -33,6 +33,11 @@ QuerySet::QuerySet(string filename) {
     }
 }
 
+void QuerySet::IterateQueries(function<void(Query)> fn) {
+    for(auto i: queries) {
+        fn(i);
+    }
+}
 
 static inline std::string &rtrim(std::string &s) {
         s.erase(std::find_if(s.rbegin(), s.rend(),
@@ -58,6 +63,9 @@ vector<string> split(string mystr, char c)
     return result;
 }
 
+//===================================
+// BooleanModel
+//===================================
 BooleanModel::BooleanModel(InvFile *invFile): invFile(invFile) {
 }
 
@@ -71,4 +79,31 @@ void BooleanModel::operator() (Query q) {
 
     invFile->RetrievalBoolean(ss.str()).Print(q.first);
     //cout << ss.str() << endl;
+}
+
+//===================================
+// VSM
+//===================================
+VSM::VSM(InvFile *invFile): invFile(invFile) {
+}
+
+void VSM::operator() (Query q) {
+    invFile->RetrievalVSM(q.second).PrintVSM(q.first);
+}
+
+//===================================
+// VSM
+//===================================
+BooleanModelEnhanced::BooleanModelEnhanced(InvFile *invFile): invFile(invFile) {
+}
+
+void BooleanModelEnhanced::operator() (Query q) {
+    vector<string> tokens = split(rtrim(q.second));
+    stringstream ss;
+    for(int i=0; i<tokens.size()-1; i++) {
+        ss << tokens[i] << " ";
+    }
+    ss << tokens[tokens.size()-1];
+
+    invFile->RetrievalBoolean(ss.str()).Print(q.first);
 }
