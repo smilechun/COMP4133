@@ -129,7 +129,7 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
         for(auto j = hnode.cbegin(); j != hnode.cend(); j++) {
             // j->first = docID
             // j->second = term freq
-            docList->DocAddTF(j->first, j->second);
+            docList->DocAddTF(j->first, j->second.size());
             docList->DocAddDF(j->first, hnode.size());
         }
     }
@@ -145,7 +145,7 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
         for(auto j = hnode.cbegin(); j != hnode.cend(); j++) {
             // j->first = docID
             // j->second = term freq
-            double tf = cal_tf(j->second, docList->DocGetMaxTF(j->first));
+            double tf = cal_tf(j->second.size(), docList->DocGetMaxTF(j->first));
             double idf = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(j->first));
             double weight = tf*idf;
             //cout << "WEIGHT" << tf << ":" << idf << ":" << weight << endl;
@@ -272,7 +272,7 @@ RetrievalResult InvFile::RetrievalVSM(string query) {
         HNode hnode = got->second;
         for(auto i: hnode) {
             Score score = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(i.first));
-            tmp_result.Add(i.first, score*i.second);
+            tmp_result.Add(i.first, score*i.second.size());
         }
         result.JoinVSM(tmp_result);
     }
