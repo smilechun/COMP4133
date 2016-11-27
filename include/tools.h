@@ -11,7 +11,7 @@ extern class tools *Global_Tools;
 
 class tools {
 public:
-    tools(string stop_file, string file_txt);
+    tools(string stop_file, string query_stop, string file_txt);
     int is_stop(string word, int ignore_case = 1);
     string stem(string word);
     string get_trec_map(int docID);

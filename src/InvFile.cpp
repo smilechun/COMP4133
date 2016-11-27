@@ -114,6 +114,7 @@ InvFile::~InvFile() {
 void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
     if (docList != 0)
         delete docList; 
+    cerr << "Build document length" << endl;
     docList = new DocumentList(doc_count);
     this->cal_tf = cal_tf;
     this->cal_idf = cal_idf;
@@ -122,7 +123,6 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
     //  Build max_tf, sum_tf, unique_terms
     // ===================================
     // Loop through all hnodes
-    cerr << "S1" << endl;
     for(auto i = inv_file.cbegin(); i != inv_file.cend(); i++) {
         auto hnode = i->second;
         // Loop through all post in a hnode
@@ -138,7 +138,6 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
     //  Build document length
     // ===================================
     // Loop through all hnodes
-    cerr << "S2" << endl;
     for(auto i = inv_file.cbegin(); i != inv_file.cend(); i++) {
         auto hnode = i->second;
         // Loop through all post in a hnode
@@ -153,7 +152,6 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
         }
     }
     docList->cal_avg();
-    cerr << "S3" << endl;
 }
 
 void InvFile::Build(string filename) {
@@ -165,11 +163,14 @@ void InvFile::Build(string filename) {
         cerr << "Cannot open file: " << filename << endl;
         abort();
     }
+    cerr << "Build inverse file." << endl;
     string line;
     while(getline(file, line)) {
         //docnO 0 1
         size_t space1 = line.find(" ");
 		size_t space2 = line.find(" ", space1 + 1);
+        if (space1==string::npos || space2==string::npos || space1==space2)
+            cerr << "WTF IS THIS" << docID << endl;
 		docID = stoi(line.substr(space1 + 1, space2 - space1));
 		offset = stoi(line.substr(space2 + 1));
         Add(line.substr(0, space1), docID, offset);
@@ -215,15 +216,30 @@ double InvFile::GetIDF(string stem_word) {
     return log2(doc_count*1.0/df);
 }
 
+void removeCharsFromString( string &str, string charsToRemove ) {
+    for ( unsigned int i = 0; i < charsToRemove.length(); ++i ) {
+        str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
+    }
+}
 // query = "a & ( b | c)"
 RetrievalResult InvFile::RetrievalBoolean(string query) {
     stack<RetrievalResult> mystack;
     Boolean b(query);
     for(auto i: b.GetPostfixExp()) {
         if(!Boolean::IsOperator(i)) {
-            string temp = Global_Tools->stem(i);
-            mystack.push(RetrieveExist(temp));
+            string tmp(i);
+            removeCharsFromString(tmp, "(),.'\"/`?!><{}*&^%$#@~;:|[]=-_+");
+            if(tmp.empty() || Global_Tools->is_stop(tmp)) {
+                mystack.push(RetrievalResult()); // empty result for stop words
+            } else {
+                string temp = Global_Tools->stem(tmp);
+                mystack.push(RetrieveExist(temp));
+            }
         } else {
+            if(mystack.size() < 2) {
+                cerr << "Bad Query: " << query << endl;
+                return RetrievalResult();
+            }
             RetrievalResult r1 = mystack.top(); mystack.pop();
             RetrievalResult r2 = mystack.top(); mystack.pop();
             if(i=="&") {
@@ -236,11 +252,17 @@ RetrievalResult InvFile::RetrievalBoolean(string query) {
             mystack.push(r2);
         }
     }
+    if(mystack.empty()) {
+        cerr << "Bad Query: " << query << endl;
+        return RetrievalResult();
+    }
     return mystack.top();
 }
 
 RetrievalResult InvFile::RetrieveExist(string query) {
     RetrievalResult result;
+    //if(query.empty() || Global_Tools->is_stop(query))
+        //return result;
     _InvFile::iterator ret = inv_file.find(query);
     if (ret == inv_file.end()) {
         return result;

@@ -40,7 +40,6 @@ void tools::load_stop(const char *f) {
         abort();
     }
 	std::string x;
-	this->stop_list.clear();
 	char line[1000];
 
 	while (fgets(line, 1000, fp) != NULL) {
@@ -53,8 +52,9 @@ void tools::load_stop(const char *f) {
 	fclose(fp);
 }
 
-tools::tools(string stop_file, string file_txt) {
+tools::tools(string stop_file, string query_stop, string file_txt) {
 	load_stop(stop_file.c_str());
+	load_stop(query_stop.c_str());
     load_file(file_txt);
 }
 

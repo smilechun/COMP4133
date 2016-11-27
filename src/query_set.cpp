@@ -8,7 +8,7 @@
 #include <cctype>
 #include <locale>
 
-#define LONG_QUERY_THRESHOLD 7
+int LONG_QUERY_THRESHOLD = 50;
 
 QuerySet::QuerySet(string filename) {
     ifstream file(filename);
@@ -16,6 +16,7 @@ QuerySet::QuerySet(string filename) {
         cerr << "Cannot open file: " << filename << endl;
         abort();
     }
+    cerr << "Prasing queries." << endl;
     string line;
     while(getline(file, line)) {
         //docnO 0 1
@@ -26,14 +27,21 @@ QuerySet::QuerySet(string filename) {
     }
 
     // Judge whether the query is long or short
-    if (queries[0].second.length()<=LONG_QUERY_THRESHOLD) {
+    long long avg_line_width = 0;
+    for (auto i: queries) {
+        avg_line_width += i.second.length();
+    }
+    avg_line_width /= queries.size();
+    if (avg_line_width<=LONG_QUERY_THRESHOLD) {
         long_query = 0;
     } else {
         long_query = 1;
     }
+    //cerr << "!!QUERYQUERY " << long_query << endl;
 }
 
 void QuerySet::IterateQueries(function<void(Query)> fn) {
+    cerr << "Processing queries." << endl;
     for(auto i: queries) {
         fn(i);
     }
@@ -66,19 +74,22 @@ vector<string> split(string mystr, char c)
 //===================================
 // BooleanModel
 //===================================
-BooleanModel::BooleanModel(InvFile *invFile): invFile(invFile) {
+BooleanModel::BooleanModel(InvFile *invFile, int longQuery): invFile(invFile), longQuery(longQuery) {
 }
 
 void BooleanModel::operator() (Query q) {
     vector<string> tokens = split(rtrim(q.second));
     stringstream ss;
     for(int i=0; i<tokens.size()-1; i++) {
-        ss << tokens[i] << " & ";
+        if(longQuery)
+            ss << tokens[i] << " | ";
+        else
+            ss << tokens[i] << " & ";
     }
     ss << tokens[tokens.size()-1];
 
     invFile->RetrievalBoolean(ss.str()).Print(q.first);
-    //cout << ss.str() << endl;
+    //cerr << ss.str() << endl;
 }
 
 //===================================

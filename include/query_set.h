@@ -14,8 +14,8 @@ class QuerySet {
 public:
     QuerySet(string filename);
     void IterateQueries(function<void(Query)> fn);
-private:
     int long_query;
+private:
     vector<Query> queries;
 };
 
@@ -25,10 +25,11 @@ static inline std::string &rtrim(std::string &s);
 // A functor
 class BooleanModel {
 public:
-    BooleanModel(InvFile *invFile);
+    BooleanModel(InvFile *invFile, int longQuery);
     void operator() (Query q);
 private:
     InvFile *invFile;
+    int longQuery;
 };
 
 class VSM {

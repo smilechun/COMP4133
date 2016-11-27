@@ -2,6 +2,7 @@
 #include "tools.h"
 #include "InvFile.h"
 #include "query_set.h"
+#include "parse_opts.h"
 
 #ifdef RUN_GTEST
 #include <gtest/gtest.h>
@@ -10,21 +11,31 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    if(argc != 2) {
-        cout << "Usage: ./comp4133 <query file>" << endl;
+    Options *opts = parse_opts(argc, argv);
+    if(!opts) {
+        print_usage();
         return -1;
     }
 
     // Initialization
-    Global_Tools = new tools("data/stopword/estop.lst", "data/file.txt");
+    // Read stop word lists and file.txt
+    Global_Tools = new tools("data/stopword/estop.lst", "data/stopword/querystop.lst", "data/file.txt");
+
+    // Build inverted file
     InvFile inv;
     inv.Build("data/data/post1.txt");
     inv.BuildDocument(TF_double_norm_K, IDF_idf);
-    QuerySet querySet(argv[1]);
-    BooleanModelEnhanced bme(&inv);
-    querySet.IterateQueries(bme);
-    //BooleanModel bm(&inv);
-    //querySet.IterateQueries(bm);
+
+    // Process query
+    QuerySet querySet(opts->query_file);
+
+    if(querySet.long_query && opts->retrieval_model == Options::RetrievalModel::Boolean_NLP) {
+        BooleanModelEnhanced bme(&inv);
+        querySet.IterateQueries(bme);
+    } else {
+        BooleanModel bm(&inv, querySet.long_query);
+        querySet.IterateQueries(bm);
+    }
     //VSM vsm(&inv);
     //querySet.IterateQueries(vsm);
 
