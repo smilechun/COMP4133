@@ -23,8 +23,36 @@ int main(int argc, char** argv) {
 
     // Build inverted file
     InvFile inv;
-    inv.Build("data/data/post1.txt");
-    inv.BuildDocument(TF_double_norm_K, IDF_idf);
+    if(inv.Build("data/data/post1.txt"))
+        return 1;
+
+    CAL_TF cal_tf;
+    CAL_IDF cal_idf;
+    if(opts->tf_function==1) {
+        cal_tf =  TF_binary;
+    } else if(opts->tf_function==2) {
+        cal_tf = TF_raw_freq;
+    } else if(opts->tf_function==3) {
+        cal_tf = TF_log_norm;
+    } else if(opts->tf_function==4) {
+        cal_tf = TF_double_norm;
+    } else if(opts->tf_function==5) {
+        cal_tf = TF_double_norm_K;
+    }
+    
+    if(opts->idf_function==1) {
+        cal_idf = IDF_unary;
+    } else if(opts->idf_function==2) {
+        cal_idf = IDF_idf;
+    } else if(opts->idf_function==3) {
+        cal_idf = IDF_idf_smooth;
+    } else if(opts->idf_function==4) {
+        cal_idf = IDF_idf_max;
+    } else if(opts->idf_function==5) {
+        cal_idf = IDF_prob_idf;
+    }
+    
+    inv.BuildDocument(cal_tf, cal_idf);
 
     // Process query
     QuerySet querySet(opts->query_file);

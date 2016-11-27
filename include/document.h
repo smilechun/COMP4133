@@ -23,19 +23,21 @@ public:
     int DocGetMaxTF(int docID);
     int DocGetMaxDF(int docID);
     double DocGetLen(int docID);
+    double DocGetUniqTerms(int docID);
 
     // Avg values
     void cal_avg();
     double get_avg_doc_len();
     double get_avg_unique_term();
 
+    void printDEBUG();
+    double avg_doc_len;
+    double avg_unique_term;
 private:
     DocumentList();
     double avg_doc_normalization;
     vector<Document> documents;
 
-    double avg_doc_len;
-    double avg_unique_term;
 };
 
 #endif

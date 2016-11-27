@@ -99,7 +99,21 @@ void RetrievalResult::JoinVSM(RetrievalResult r2) {
 
 void RetrievalResult::NormalizeVSM(DocumentList *docList) {
     for(auto &i: result) {
-        i.second.score /= docList->DocGetLen(i.first);
+        //i.second.score /= docList->DocGetLen(i.first);
+
+        /*
+        double s = 0.75;
+        i.second.score /= (1-s)+(s)*(docList->DocGetLen(i.first)/docList->avg_doc_len);
+        */
+
+        /*
+        double s = 0.85;
+        i.second.score /= (1-s)+(s)*(docList->DocGetLen(i.first)/docList->avg_doc_len);
+        */
+
+
+        double s = 0.4;
+        i.second.score /= (1-s)+(s)*(docList->DocGetUniqTerms(i.first));
     }
 }
 
@@ -154,14 +168,14 @@ void InvFile::BuildDocument(CAL_TF cal_tf, CAL_IDF cal_idf) {
     docList->cal_avg();
 }
 
-void InvFile::Build(string filename) {
+int InvFile::Build(string filename) {
     int count = 0;
     DocID docID;
 	Offset offset;
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Cannot open file: " << filename << endl;
-        abort();
+        return -1;
     }
     cerr << "Build inverse file." << endl;
     string line;
@@ -176,6 +190,7 @@ void InvFile::Build(string filename) {
         Add(line.substr(0, space1), docID, offset);
     }
     doc_count = docID+1;    //docID start from 0
+    return 0;
 }
 
 void InvFile::Add(string stem_word, DocID docid, Offset offset) {
@@ -192,7 +207,7 @@ void InvFile::Add(string stem_word, DocID docid, Offset offset) {
 		if (posts == iter->second.end()) {
 			// insert a new document
 			Posts p({ offset });
-			iter->second.insert(posts, HNode::value_type(docid, p));
+			iter->second.insert(HNode::value_type(docid, p));
 		} else {
 			// document exists, insert a new offset into list
 			posts->second.push_back(offset);
@@ -293,8 +308,9 @@ RetrievalResult InvFile::RetrievalVSM(string query) {
         RetrievalResult tmp_result;
         HNode hnode = got->second;
         for(auto i: hnode) {
-            Score score = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(i.first));
-            tmp_result.Add(i.first, score*i.second.size());
+            double idf = cal_idf(doc_count, hnode.size(), docList->DocGetMaxDF(i.first));
+            double tf = cal_tf(i.second.size(), docList->DocGetMaxTF(i.first));
+            tmp_result.Add(i.first, tf*idf);
         }
         result.JoinVSM(tmp_result);
     }

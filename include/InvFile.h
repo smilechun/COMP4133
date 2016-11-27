@@ -52,7 +52,7 @@ public:
     ~InvFile();
     
     // Init functions
-    void Build(string filename);
+    int Build(string filename);
 	void Add(string stem_word, DocID docid, Offset offset);
 
     // Retrieval functions
