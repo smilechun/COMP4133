@@ -29,15 +29,17 @@ int main(int argc, char** argv) {
     // Process query
     QuerySet querySet(opts->query_file);
 
-    if(querySet.long_query && opts->retrieval_model == Options::RetrievalModel::Boolean_NLP) {
+    if(opts->retrieval_model == Options::RetrievalModel::VSM) {
+        VSM vsm(&inv);
+        querySet.IterateQueries(vsm);
+    } else if(querySet.long_query && 
+                opts->retrieval_model == Options::RetrievalModel::Boolean_NLP) {
         BooleanModelEnhanced bme(&inv);
         querySet.IterateQueries(bme);
     } else {
         BooleanModel bm(&inv, querySet.long_query);
         querySet.IterateQueries(bm);
     }
-    //VSM vsm(&inv);
-    //querySet.IterateQueries(vsm);
 
 #ifdef RUN_GTEST
 	::testing::InitGoogleTest(&argc, argv);
