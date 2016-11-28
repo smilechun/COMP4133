@@ -10,9 +10,10 @@
 
 using namespace std;
 
+
 int main(int argc, char** argv) {
-    Options *opts = parse_opts(argc, argv);
-    if(!opts) {
+    Global_Opts = parse_opts(argc, argv);
+    if(!Global_Opts) {
         print_usage();
         return -1;
     }
@@ -28,40 +29,40 @@ int main(int argc, char** argv) {
 
     CAL_TF cal_tf;
     CAL_IDF cal_idf;
-    if(opts->tf_function==1) {
+    if(Global_Opts->tf_function==1) {
         cal_tf =  TF_binary;
-    } else if(opts->tf_function==2) {
+    } else if(Global_Opts->tf_function==2) {
         cal_tf = TF_raw_freq;
-    } else if(opts->tf_function==3) {
+    } else if(Global_Opts->tf_function==3) {
         cal_tf = TF_log_norm;
-    } else if(opts->tf_function==4) {
+    } else if(Global_Opts->tf_function==4) {
         cal_tf = TF_double_norm;
-    } else if(opts->tf_function==5) {
+    } else if(Global_Opts->tf_function==5) {
         cal_tf = TF_double_norm_K;
     }
     
-    if(opts->idf_function==1) {
+    if(Global_Opts->idf_function==1) {
         cal_idf = IDF_unary;
-    } else if(opts->idf_function==2) {
+    } else if(Global_Opts->idf_function==2) {
         cal_idf = IDF_idf;
-    } else if(opts->idf_function==3) {
+    } else if(Global_Opts->idf_function==3) {
         cal_idf = IDF_idf_smooth;
-    } else if(opts->idf_function==4) {
+    } else if(Global_Opts->idf_function==4) {
         cal_idf = IDF_idf_max;
-    } else if(opts->idf_function==5) {
+    } else if(Global_Opts->idf_function==5) {
         cal_idf = IDF_prob_idf;
     }
     
     inv.BuildDocument(cal_tf, cal_idf);
 
     // Process query
-    QuerySet querySet(opts->query_file);
+    QuerySet querySet(Global_Opts->query_file);
 
-    if(opts->retrieval_model == Options::RetrievalModel::VSM) {
+    if(Global_Opts->retrieval_model == Options::RetrievalModel::VSM) {
         VSM vsm(&inv);
         querySet.IterateQueries(vsm);
     } else if(querySet.long_query && 
-                opts->retrieval_model == Options::RetrievalModel::Boolean_NLP) {
+                Global_Opts->retrieval_model == Options::RetrievalModel::Boolean_NLP) {
         BooleanModelEnhanced bme(&inv);
         querySet.IterateQueries(bme);
     } else {

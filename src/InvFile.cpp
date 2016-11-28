@@ -1,4 +1,5 @@
 #include "InvFile.h"
+#include "parse_opts.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -9,6 +10,7 @@
 #include <sstream>
 
 #define HASH_INIT_SIZE 330000
+
 
 void RetrievalResult::Add(DocID docID, Score score) {
     RetrievalDoc doc;
@@ -99,21 +101,18 @@ void RetrievalResult::JoinVSM(RetrievalResult r2) {
 
 void RetrievalResult::NormalizeVSM(DocumentList *docList) {
     for(auto &i: result) {
-        //i.second.score /= docList->DocGetLen(i.first);
-
-        /*
-        double s = 0.75;
-        i.second.score /= (1-s)+(s)*(docList->DocGetLen(i.first)/docList->avg_doc_len);
-        */
-
-        /*
-        double s = 0.85;
-        i.second.score /= (1-s)+(s)*(docList->DocGetLen(i.first)/docList->avg_doc_len);
-        */
-
-
-        double s = 0.4;
-        i.second.score /= (1-s)+(s)*(docList->DocGetUniqTerms(i.first));
+        if (Global_Opts->nf_function==1) {
+            //Cosine Similarity - vector lengths
+            i.second.score /= docList->DocGetLen(i.first);
+        } else if (Global_Opts->nf_function==2) {
+            //Pivoted cosine normalization
+            double s = Global_Opts->pivoted_slope;
+            i.second.score /= (1-s)+(s)*(docList->DocGetLen(i.first)/docList->avg_doc_len);
+        } else if (Global_Opts->nf_function==3) {
+            //Pivoted unique normalization
+            double s = Global_Opts->pivoted_slope;
+            i.second.score /= (1-s)*docList->avg_unique_term+(s)*(docList->DocGetUniqTerms(i.first));
+        }
     }
 }
 

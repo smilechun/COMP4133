@@ -60,7 +60,7 @@ void DocumentList::cal_avg() {
     for(auto &i: documents) {
         i.doc_len = sqrt(i.cumulative_weight_sqrt);
         //Avg
-        avg_unique_term += i.cumulative_weight_sqrt;
+        avg_unique_term += i.unique_terms;
         avg_doc_len += i.doc_len;
     }
     avg_unique_term /= documents.size();
