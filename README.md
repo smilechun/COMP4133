@@ -28,7 +28,7 @@ Options:
 
 Select retrieval model
    -b        Boolean model
-   -n        Boolean model(NLP)
+   -n        Boolean model(NLP) - Require file produced by NLP model
    -v        Vector space model(VSM)
 
 Select tf function (for VSM)

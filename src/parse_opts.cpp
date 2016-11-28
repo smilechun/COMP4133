@@ -12,7 +12,7 @@ void print_usage() {
     cerr << endl;
     cerr << "Select retrieval model" << endl;
     cerr << "   -b        Boolean model" << endl;
-    cerr << "   -n        Boolean model(NLP)" << endl;
+    cerr << "   -n        Boolean model(NLP) - Require file produced by NLP model" << endl;
     cerr << "   -v        Vector space model(VSM)" << endl;
     cerr << endl;
     cerr << "Select tf function (for VSM)" << endl;
